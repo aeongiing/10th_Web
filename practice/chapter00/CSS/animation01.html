@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>animation 예제</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column; /* 🔥 이거 추가 */
+        gap: 20px;
+        padding: 50px;
+      }
+
+      .box {
+        width: 100px;
+        height: 100px;
+        background: purple;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* 기본 애니메이션 */
+      .basic {
+        animation-name: move;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+      }
+
+      /* delay */
+      .delay {
+        animation: move 1s ease 0.5s infinite;
+      }
+
+      /* alternate */
+      .alternate {
+        animation: move 1s ease infinite alternate;
+      }
+
+      /* forwards */
+      .forwards {
+        animation: move 1s ease forwards;
+      }
+
+      /* hover 시 멈춤 */
+      .pause {
+        animation: move 1s linear infinite;
+        animation-play-state: paused; /* 처음엔 멈춤 */
+      }
+
+      .pause:hover {
+        animation-play-state: running; /* hover 시 실행 */
+      }
+
+      /* keyframes */
+      @keyframes move {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(200px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box basic">기본</div>
+    <div class="box delay">delay</div>
+    <div class="box alternate">왕복</div>
+    <div class="box forwards">끝유지</div>
+    <div class="box pause">hover 멈춤</div>
+  </body>
+</html>

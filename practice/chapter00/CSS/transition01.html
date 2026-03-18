@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>transition 예제</title>
+    <style>
+      body {
+        display: flex;
+        gap: 20px;
+        padding: 50px;
+      }
+
+      .box {
+        width: 100px;
+        height: 100px;
+        background: purple;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        transition-property: all;
+        transition-duration: 0.4s;
+        transition-timing-function: ease;
+        transition-delay: 0s;
+      }
+
+      /* hover 시 변화 */
+      .box:hover {
+        background: orange;
+        transform: scale(1.3) rotate(15deg);
+      }
+
+      /* delay 예제 */
+      .delay {
+        transition: all 0.5s ease 0.5s;
+      }
+
+      /* timing function 비교 */
+      .linear {
+        transition: all 0.5s linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">기본</div>
+    <div class="box delay">delay</div>
+    <div class="box linear">linear</div>
+  </body>
+</html>

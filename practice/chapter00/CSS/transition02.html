@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transition 실습</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 120px;
+        background: #fff;
+        padding: 60px 0;
+      }
+
+      .diamond {
+        width: 200px;
+        height: 200px;
+        transform: rotate(45deg);
+        cursor: pointer;
+        /* 축약형: property duration timing-function delay */
+        transition: background-color 0.4s ease 0.05s, transform 0.4s ease 0.05s;
+      }
+
+      .diamond--pink {
+        background-color: lightpink;
+      }
+
+      .diamond--pink:hover {
+        background-color: purple;
+        transform: rotate(45deg) scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="diamond diamond--pink"></div>
+    <div class="diamond diamond--pink"></div>
+    <div class="diamond diamond--pink"></div>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>transform 예제</title>
+    <style>
+      body {
+        display: flex;
+        gap: 20px;
+        padding: 50px;
+      }
+
+      .box {
+        width: 100px;
+        height: 100px;
+        background: purple;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .translate {
+        transform: translate(30px, 20px);
+      }
+
+      .scale {
+        transform: scale(1.5);
+      }
+
+      .rotate {
+        transform: rotate(45deg);
+      }
+
+      .skew {
+        transform: skew(20deg);
+      }
+
+      .matrix {
+        transform: matrix(1, 0.3, 0.3, 1, 30, 20);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box translate">translate</div>
+    <div class="box scale">scale</div>
+    <div class="box rotate">rotate</div>
+    <div class="box skew">skew</div>
+    <div class="box matrix">matrix</div>
+  </body>
+</html>

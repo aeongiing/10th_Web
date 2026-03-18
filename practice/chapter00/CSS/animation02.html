@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animation 실습</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        background: #fff;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 80px;
+      }
+
+      .ball {
+        width: 160px;
+        height: 160px;
+        background-color: #8b008b;
+        border-radius: 50%;
+        /* 축약형: name duration timing-function delay iteration-count direction */
+        animation: bounce 0.6s cubic-bezier(0.33, 0, 0.66, 0) 0s infinite
+          alternate;
+      }
+
+      @keyframes bounce {
+        /* 꼭대기: 원 */
+        from {
+          transform: translateY(-400px);
+          border-radius: 50%;
+          width: 160px;
+          height: 160px;
+        }
+        /* 바닥: 가로로 납작한 타원 */
+        to {
+          transform: translateY(0);
+          border-radius: 50%;
+          width: 180px;
+          height: 140px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ball"></div>
+  </body>
+</html>

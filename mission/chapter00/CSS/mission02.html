@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>css_mission02</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+      }
+
+      /* 공통 텍스트 */
+      .label {
+        font-size: 45px;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      /* ===== BEM: Block - layout ===== */
+
+      /* HEADER + MENU → flex */
+      .layout__header {
+        display: flex;
+        height: 120px;
+      }
+
+      .layout__header-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0f1b2d;
+        width: 240px;
+        flex-shrink: 0;
+      }
+
+      .layout__header-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        background-color: #e84057;
+      }
+
+      /* HERO */
+      .layout__hero {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 380px;
+        background-color: #4a7bbf;
+      }
+
+      /* MAIN 영역 → grid (3열) */
+      .layout__content {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        height: 440px;
+      }
+
+      .layout__main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #1e2d45;
+        grid-column: 1 / 2;
+      }
+
+      /* 가운데 흰색 공백 */
+      .layout__blank {
+        background-color: #fff;
+        grid-column: 2 / 3;
+      }
+
+      /* IMAGE + EXTRA → grid (2행) */
+      .layout__side {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        grid-column: 3 / 4;
+      }
+
+      .layout__image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #b2ddd4;
+      }
+
+      .layout__image .label {
+        color: #000;
+      }
+
+      .layout__extra {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #3dba8a;
+      }
+
+      .layout__extra .label {
+        color: #000;
+      }
+
+      /* BANNER */
+      .layout__banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 120px;
+        background-color: #f5c842;
+      }
+
+      .layout__banner .label {
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER + MENU (flex) -->
+    <header class="layout__header">
+      <div class="layout__header-logo">
+        <span class="label">HEADER</span>
+      </div>
+      <nav class="layout__header-menu">
+        <span class="label">MENU</span>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="layout__hero">
+      <span class="label">HERO</span>
+    </section>
+
+    <!-- MAIN + BLANK + SIDE (grid) -->
+    <div class="layout__content">
+      <main class="layout__main">
+        <span class="label">MAIN</span>
+      </main>
+
+      <div class="layout__blank"></div>
+
+      <div class="layout__side">
+        <div class="layout__image">
+          <span class="label">IMAGE</span>
+        </div>
+        <div class="layout__extra">
+          <span class="label">EXTRA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANNER -->
+    <footer class="layout__banner">
+      <span class="label">BANNER</span>
+    </footer>
+  </body>
+</html>

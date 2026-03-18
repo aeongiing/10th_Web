@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>js_mission01</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #eef0f5;
+        font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .plan {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      .plan__title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: midnightblue;
+        margin-bottom: 32px;
+      }
+
+      .plan__input {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 15px;
+        border: 1.5px solid #c8cbe0;
+        border-radius: 8px;
+        background: #fff;
+        outline: none;
+        color: #333;
+        margin-bottom: 32px;
+        transition: border-color 0.2s;
+      }
+
+      .plan__input:focus {
+        border-color: #7c83f5;
+      }
+      .plan__input::placeholder {
+        color: #aaa;
+      }
+
+      .plan__columns {
+        display: flex;
+        gap: 40px;
+      }
+
+      .plan__column {
+        flex: 1;
+      }
+
+      .plan__column-title {
+        font-size: 14px;
+        color: #888;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .plan__divider {
+        width: 1px;
+        background-color: #d0d3e8;
+        flex-shrink: 0;
+      }
+
+      .plan__list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .plan__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 15px;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .plan__item-text {
+        flex: 1;
+        color: black;
+      }
+
+      .plan__item--done .plan__item-text {
+        color: black;
+      }
+
+      .plan__item-actions {
+        display: flex;
+        gap: 6px;
+        margin-left: 12px;
+      }
+
+      .plan__btn {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        border: 1px solid #d0d3e8;
+        background: #f5f6fb;
+        color: #555;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .plan__btn--complete:hover {
+        background: #7c83f5;
+        color: #fff;
+        border-color: #7c83f5;
+      }
+      .plan__btn--delete:hover {
+        background: #ff5c5c;
+        color: #fff;
+        border-color: #ff5c5c;
+      }
+
+      .plan__empty {
+        text-align: center;
+        color: #bbb;
+        font-size: 13px;
+        padding: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="plan">
+      <h1 class="plan__title">이번주 Web 워크북 Todo List</h1>
+      <input
+        class="plan__input"
+        id="plan-input"
+        type="text"
+        placeholder="스터디 계획을 작성해보세요!"
+      />
+
+      <div class="plan__columns">
+        <div class="plan__column">
+          <p class="plan__column-title">해야 할 일</p>
+          <ul class="plan__list" id="todo-list"></ul>
+        </div>
+        <div class="plan__divider"></div>
+        <div class="plan__column">
+          <p class="plan__column-title">해낸 일</p>
+          <ul class="plan__list" id="done-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const input = document.getElementById("plan-input");
+      const todoList = document.getElementById("todo-list");
+      const doneList = document.getElementById("done-list");
+
+      // 빈 상태 메시지 업데이트
+      function updateEmpty(list, message) {
+        const isEmpty = list.querySelectorAll(".plan__item").length === 0;
+        let empty = list.querySelector(".plan__empty");
+
+        if (isEmpty && !empty) {
+          empty = document.createElement("li");
+          empty.className = "plan__empty";
+          empty.textContent = message;
+          list.appendChild(empty);
+        } else if (!isEmpty && empty) {
+          empty.remove();
+        }
+      }
+
+      // 아이템 생성
+      function createItem(text, isDone) {
+        const li = document.createElement("li");
+        li.className = "plan__item" + (isDone ? " plan__item--done" : "");
+
+        const span = document.createElement("span");
+        span.className = "plan__item-text";
+        span.textContent = text;
+
+        const actions = document.createElement("div");
+        actions.className = "plan__item-actions";
+
+        if (!isDone) {
+          const completeBtn = createBtn("완료", "complete", () =>
+            completeTodo(li, text)
+          );
+          actions.appendChild(completeBtn);
+        }
+
+        const deleteBtn = createBtn("삭제", "delete", () =>
+          deleteTodo(li, isDone)
+        );
+        actions.appendChild(deleteBtn);
+
+        li.append(span, actions);
+        return li;
+      }
+
+      // 버튼 생성 헬퍼
+      function createBtn(label, type, handler) {
+        const btn = document.createElement("button");
+        btn.className = `plan__btn plan__btn--${type}`;
+        btn.textContent = label;
+        btn.onclick = handler;
+        return btn;
+      }
+
+      function addTodo(text) {
+        text = text.trim();
+        if (!text) return;
+        todoList.appendChild(createItem(text, false));
+        updateEmpty(todoList, "할 일을 입력해보세요!");
+      }
+
+      function completeTodo(li, text) {
+        li.remove();
+        doneList.appendChild(createItem(text, true));
+        updateEmpty(todoList, "할 일을 입력해보세요!");
+        updateEmpty(doneList, "완료한 일이 없어요!");
+      }
+
+      function deleteTodo(li, isDone) {
+        li.remove();
+        updateEmpty(
+          isDone ? doneList : todoList,
+          isDone ? "완료한 일이 없어요!" : "할 일을 입력해보세요!"
+        );
+      }
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" || e.isComposing) return;
+        addTodo(input.value);
+        input.value = "";
+      });
+
+      // 초기 빈 상태
+      updateEmpty(todoList, "할 일을 입력해보세요!");
+      updateEmpty(doneList, "완료한 일이 없어요!");
+    </script>
+  </body>
+</html>

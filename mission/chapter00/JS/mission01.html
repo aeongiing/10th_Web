@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>js_mission01</title>
     <style>
+      /* ── 리셋 & 기본값 ── */
       * {
         margin: 0;
         padding: 0;
@@ -18,9 +19,15 @@
         padding: 40px 20px;
       }
 
+      /* ── 레이아웃 래퍼 ── */
       .plan {
         max-width: 860px;
         margin: 0 auto;
+      }
+
+      /* ── header: 제목 ── */
+      header.plan__header {
+        margin-bottom: 32px;
       }
 
       .plan__title {
@@ -28,10 +35,11 @@
         font-size: 28px;
         font-weight: 700;
         color: midnightblue;
-        margin-bottom: 32px;
       }
 
+      /* ── input: 할 일 입력 ── */
       .plan__input {
+        display: block;
         width: 100%;
         padding: 14px 18px;
         font-size: 15px;
@@ -47,20 +55,22 @@
       .plan__input:focus {
         border-color: #7c83f5;
       }
+
       .plan__input::placeholder {
         color: #aaa;
       }
 
-      .plan__columns {
+      /* ── section 영역 (해야 할 일 / 해낸 일) ── */
+      .plan__sections {
         display: flex;
         gap: 40px;
       }
 
-      .plan__column {
+      .plan__section {
         flex: 1;
       }
 
-      .plan__column-title {
+      .plan__section-title {
         font-size: 14px;
         color: #888;
         margin-bottom: 16px;
@@ -73,6 +83,7 @@
         flex-shrink: 0;
       }
 
+      /* ── 목록 정렬 ── */
       .plan__list {
         list-style: none;
         display: flex;
@@ -80,6 +91,7 @@
         gap: 8px;
       }
 
+      /* ── 아이템 ── */
       .plan__item {
         display: flex;
         align-items: center;
@@ -104,13 +116,16 @@
 
       .plan__item-text {
         flex: 1;
-        color: black;
+        color: #333;
       }
 
+      /* ── 완료 상태 시각적 차이: 취소선 + 색상 변경 ── */
       .plan__item--done .plan__item-text {
-        color: black;
+        text-decoration: line-through;
+        color: #aaa;
       }
 
+      /* ── 버튼 크기/간격 ── */
       .plan__item-actions {
         display: flex;
         gap: 6px;
@@ -133,23 +148,31 @@
         color: #fff;
         border-color: #7c83f5;
       }
+
       .plan__btn--delete:hover {
         background: #ff5c5c;
         color: #fff;
         border-color: #ff5c5c;
       }
 
+      /* ── 빈 상태 메시지 ── */
       .plan__empty {
         text-align: center;
         color: #bbb;
         font-size: 13px;
         padding: 20px 0;
+        list-style: none;
       }
     </style>
   </head>
   <body>
     <div class="plan">
-      <h1 class="plan__title">이번주 Web 워크북 Todo List</h1>
+      <!-- header: 제목 -->
+      <header class="plan__header">
+        <h1 class="plan__title">이번주 Web 워크북 Todo List</h1>
+      </header>
+
+      <!-- input: 할 일 입력 -->
       <input
         class="plan__input"
         id="plan-input"
@@ -157,16 +180,19 @@
         placeholder="스터디 계획을 작성해보세요!"
       />
 
-      <div class="plan__columns">
-        <div class="plan__column">
-          <p class="plan__column-title">해야 할 일</p>
+      <!-- section 영역: 해야 할 일 / 해낸 일 -->
+      <div class="plan__sections">
+        <section class="plan__section" aria-label="해야 할 일">
+          <h2 class="plan__section-title">해야 할 일</h2>
           <ul class="plan__list" id="todo-list"></ul>
-        </div>
-        <div class="plan__divider"></div>
-        <div class="plan__column">
-          <p class="plan__column-title">해낸 일</p>
+        </section>
+
+        <div class="plan__divider" role="separator"></div>
+
+        <section class="plan__section" aria-label="해낸 일">
+          <h2 class="plan__section-title">해낸 일</h2>
           <ul class="plan__list" id="done-list"></ul>
-        </div>
+        </section>
       </div>
     </div>
 
@@ -175,22 +201,36 @@
       const todoList = document.getElementById("todo-list");
       const doneList = document.getElementById("done-list");
 
-      // 빈 상태 메시지 업데이트
-      function updateEmpty(list, message) {
-        const isEmpty = list.querySelectorAll(".plan__item").length === 0;
-        let empty = list.querySelector(".plan__empty");
+      /* ── 데이터 검증 ── */
+      function isValidText(text) {
+        return text.trim().length > 0;
+      }
 
-        if (isEmpty && !empty) {
-          empty = document.createElement("li");
-          empty.className = "plan__empty";
-          empty.textContent = message;
-          list.appendChild(empty);
-        } else if (!isEmpty && empty) {
-          empty.remove();
+      /* ── 빈 상태 메시지 관리 ── */
+      function updateEmpty(list, message) {
+        const hasItems = list.querySelector(".plan__item") !== null;
+        const existing = list.querySelector(".plan__empty");
+
+        if (!hasItems && !existing) {
+          const li = document.createElement("li");
+          li.className = "plan__empty";
+          li.textContent = message;
+          list.appendChild(li);
+        } else if (hasItems && existing) {
+          existing.remove();
         }
       }
 
-      // 아이템 생성
+      /* ── 버튼 생성 헬퍼 ── */
+      function createBtn(label, type, handler) {
+        const btn = document.createElement("button");
+        btn.className = `plan__btn plan__btn--${type}`;
+        btn.textContent = label;
+        btn.addEventListener("click", handler);
+        return btn;
+      }
+
+      /* ── 아이템 DOM 생성 ── */
       function createItem(text, isDone) {
         const li = document.createElement("li");
         li.className = "plan__item" + (isDone ? " plan__item--done" : "");
@@ -202,60 +242,57 @@
         const actions = document.createElement("div");
         actions.className = "plan__item-actions";
 
+        // 미완료 아이템에만 완료 버튼 추가
         if (!isDone) {
-          const completeBtn = createBtn("완료", "complete", () =>
-            completeTodo(li, text)
+          actions.appendChild(
+            createBtn("완료", "complete", () => completeTodo(li, text))
           );
-          actions.appendChild(completeBtn);
         }
 
-        const deleteBtn = createBtn("삭제", "delete", () =>
-          deleteTodo(li, isDone)
+        actions.appendChild(
+          createBtn("삭제", "delete", () => deleteTodo(li, isDone))
         );
-        actions.appendChild(deleteBtn);
 
         li.append(span, actions);
         return li;
       }
 
-      // 버튼 생성 헬퍼
-      function createBtn(label, type, handler) {
-        const btn = document.createElement("button");
-        btn.className = `plan__btn plan__btn--${type}`;
-        btn.textContent = label;
-        btn.onclick = handler;
-        return btn;
-      }
-
+      /* ── 할 일 추가 ── */
       function addTodo(text) {
-        text = text.trim();
-        if (!text) return;
-        todoList.appendChild(createItem(text, false));
+        const trimmed = text.trim(); // 공백 트림
+        if (!isValidText(trimmed)) return; // 빈 문자열 방지
+
+        todoList.appendChild(createItem(trimmed, false)); // createElement + append
         updateEmpty(todoList, "할 일을 입력해보세요!");
       }
 
+      /* ── 완료 처리: todo → done 목록으로 이동 ── */
       function completeTodo(li, text) {
-        li.remove();
-        doneList.appendChild(createItem(text, true));
+        li.remove(); // 기존 아이템 삭제
+        doneList.appendChild(createItem(text, true)); // 완료 목록으로 append (이동)
+
+        // 클래스 토글 대신 새 아이템 생성으로 완료 상태 반영
         updateEmpty(todoList, "할 일을 입력해보세요!");
         updateEmpty(doneList, "완료한 일이 없어요!");
       }
 
+      /* ── 삭제 처리 ── */
       function deleteTodo(li, isDone) {
-        li.remove();
+        li.remove(); // DOM에서 제거
         updateEmpty(
           isDone ? doneList : todoList,
           isDone ? "완료한 일이 없어요!" : "할 일을 입력해보세요!"
         );
       }
 
+      /* ── 이벤트 바인딩: keydown Enter로 아이템 추가 ── */
       input.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter" || e.isComposing) return;
+        if (e.key !== "Enter" || e.isComposing) return; // 한글 조합 중 방지
         addTodo(input.value);
         input.value = "";
       });
 
-      // 초기 빈 상태
+      /* ── 초기 빈 상태 렌더링 ── */
       updateEmpty(todoList, "할 일을 입력해보세요!");
       updateEmpty(doneList, "완료한 일이 없어요!");
     </script>

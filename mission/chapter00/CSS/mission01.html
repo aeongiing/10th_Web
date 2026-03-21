@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>css_mission01</title>
+    <title>css_mission01 - CSS only lang toggle</title>
     <style>
       * {
         margin: 0;
@@ -14,6 +14,42 @@
       body {
         font-family: "Apple SD Gothic Neo", sans-serif;
         background-color: #fff;
+      }
+
+      /* 핵심: 숨겨진 라디오 버튼 2개
+         lang-ko가 :checked 되면 → .text-ko 표시, .text-en 숨김
+         lang-en이 :checked 되면 → .text-en 표시, .text-ko 숨김 */
+      #lang-ko,
+      #lang-en {
+        display: none;
+      }
+
+      #lang-ko:checked ~ .wrapper .navbar__lang-btn[for="lang-ko"],
+      #lang-en:checked ~ .wrapper .navbar__lang-btn[for="lang-en"] {
+        color: #6c63ff;
+        font-weight: 700;
+      }
+
+      /* ko 체크 시 → .text-en 숨김 */
+      #lang-ko:checked ~ .wrapper .text-en {
+        display: none;
+      }
+      /* en 체크 시 → .text-ko 숨김 */
+      #lang-en:checked ~ .wrapper .text-ko {
+        display: none;
+      }
+
+      #lang-ko:checked ~ .wrapper .path-ko {
+        display: inline;
+      }
+      #lang-ko:checked ~ .wrapper .path-en {
+        display: none;
+      }
+      #lang-en:checked ~ .wrapper .path-en {
+        display: inline;
+      }
+      #lang-en:checked ~ .wrapper .path-ko {
+        display: none;
       }
 
       .navbar {
@@ -78,6 +114,7 @@
         gap: 6px;
       }
 
+      /* label을 버튼처럼 스타일링 */
       .navbar__lang-btn {
         font-size: 14px;
         color: #999;
@@ -86,15 +123,12 @@
         border: none;
         font-weight: 500;
         transition: color 0.2s;
+        font-family: inherit;
+        padding: 0;
       }
 
       .navbar__lang-btn:hover {
         color: #6c63ff;
-      }
-
-      .navbar__lang-btn--active {
-        color: #6c63ff;
-        font-weight: 700;
       }
 
       .navbar__lang-divider {
@@ -135,6 +169,9 @@
           padding: 8px 14px;
           font-size: 13px;
         }
+        .navbar__button .navbar__menu-text {
+          display: none;
+        }
       }
 
       .hero {
@@ -170,110 +207,74 @@
     </style>
   </head>
   <body>
-    <nav class="navbar">
-      <a href="#" class="navbar__logo">🐱 <span>Aido</span></a>
+    <input type="radio" name="lang" id="lang-ko" checked />
+    <input type="radio" name="lang" id="lang-en" />
 
-      <ul class="navbar__menu">
-        <li class="navbar__menu-item navbar__menu-item--active">
-          <a href="#"
-            ><span class="navbar__menu-icon">🐱</span>
-            <span
-              class="navbar__menu-text"
-              data-ko="고양이 친구들"
-              data-en="Cat Friends"
-              >고양이 친구들</span
-            ></a
-          >
-        </li>
-        <li class="navbar__menu-item">
-          <a href="#"
-            ><span class="navbar__menu-icon">📋</span>
-            <span
-              class="navbar__menu-text"
-              data-ko="패치 노트"
-              data-en="Patch Notes"
-              >패치 노트</span
-            ></a
-          >
-        </li>
-        <li class="navbar__menu-item">
-          <a href="#"
-            ><span class="navbar__menu-icon">📱</span>
-            <span
-              class="navbar__menu-text"
-              data-ko="앱 다운로드"
-              data-en="Download App"
-              >앱 다운로드</span
-            ></a
-          >
-        </li>
-      </ul>
+    <div class="wrapper">
+      <nav class="navbar">
+        <a href="#" class="navbar__logo">🐱 <span>Aido</span></a>
 
-      <div class="navbar__right">
-        <div class="navbar__lang">
-          <button class="navbar__lang-btn" id="btn-ko" onclick="setLang('ko')">
-            KO
-          </button>
-          <span class="navbar__lang-divider">|</span>
-          <button class="navbar__lang-btn" id="btn-en" onclick="setLang('en')">
-            EN
+        <ul class="navbar__menu">
+          <li class="navbar__menu-item navbar__menu-item--active">
+            <a href="#">
+              <span class="navbar__menu-icon">🐱</span>
+              <span class="navbar__menu-text text-ko">고양이 친구들</span>
+              <span class="navbar__menu-text text-en">Cat Friends</span>
+            </a>
+          </li>
+          <li class="navbar__menu-item">
+            <a href="#">
+              <span class="navbar__menu-icon">📋</span>
+              <span class="navbar__menu-text text-ko">패치 노트</span>
+              <span class="navbar__menu-text text-en">Patch Notes</span>
+            </a>
+          </li>
+          <li class="navbar__menu-item">
+            <a href="#">
+              <span class="navbar__menu-icon">📱</span>
+              <span class="navbar__menu-text text-ko">앱 다운로드</span>
+              <span class="navbar__menu-text text-en">Download App</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="navbar__right">
+          <div class="navbar__lang">
+            <!-- button 대신 label → 라디오 버튼 토글 -->
+            <label class="navbar__lang-btn" for="lang-ko">KO</label>
+            <span class="navbar__lang-divider">|</span>
+            <label class="navbar__lang-btn" for="lang-en">EN</label>
+          </div>
+          <button class="navbar__button">
+            <span class="text-ko">출시 알림 받기</span>
+            <span class="text-en">Get Notified</span>
           </button>
         </div>
-        <button
-          class="navbar__button"
-          data-ko="출시 알림 받기"
-          data-en="Get Notified"
-        >
-          출시 알림 받기
-        </button>
+      </nav>
+
+      <div class="hero">
+        <h1 class="hero__title">
+          <span class="text-ko"
+            >작심삼일은 이제 그만,<br />친구와 함께 매일 성취하세요</span
+          >
+          <span class="text-en"
+            >Stop giving up in 3 days,<br />Achieve every day with friends</span
+          >
+        </h1>
+        <p class="hero__desc">
+          <span class="text-ko">고양이 친구들이 매일 응원해줄 거예요 🐱</span>
+          <span class="text-en"
+            >Your cat friends will cheer you on every day 🐱</span
+          >
+        </p>
+        <p class="path-indicator">
+          현재 경로:
+          <span>
+            <span class="path-ko">/ko</span>
+            <span class="path-en">/en</span>
+          </span>
+        </p>
       </div>
-    </nav>
-
-    <div class="hero">
-      <h1
-        class="hero__title"
-        data-ko="작심삼일은 이제 그만,<br>친구와 함께 매일 성취하세요"
-        data-en="Stop giving up in 3 days,<br>Achieve every day with friends"
-      >
-        작심삼일은 이제 그만,<br />친구와 함께 매일 성취하세요
-      </h1>
-      <p
-        class="hero__desc"
-        data-ko="고양이 친구들이 매일 응원해줄 거예요 🐱"
-        data-en="Your cat friends will cheer you on every day 🐱"
-      >
-        고양이 친구들이 매일 응원해줄 거예요 🐱
-      </p>
-      <p class="path-indicator">
-        현재 경로: <span id="current-path">/ko</span>
-      </p>
     </div>
-
-    <script>
-      function setLang(lang) {
-        // 언어 버튼 활성화
-        document
-          .getElementById("btn-ko")
-          .classList.remove("navbar__lang-btn--active");
-        document
-          .getElementById("btn-en")
-          .classList.remove("navbar__lang-btn--active");
-        document
-          .getElementById("btn-" + lang)
-          .classList.add("navbar__lang-btn--active");
-
-        // 경로 표시
-        document.getElementById("current-path").textContent = "/" + lang;
-
-        // data-ko / data-en 속성 가진 모든 요소 텍스트 변경
-        document.querySelectorAll("[data-ko][data-en]").forEach(function (el) {
-          el.innerHTML = el.getAttribute("data-" + lang);
-        });
-      }
-
-      window.onload = function () {
-        setLang("ko");
-      };
-    </script>
   </body>
 </html>

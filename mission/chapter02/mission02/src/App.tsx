@@ -1,7 +1,8 @@
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { useContext } from 'react';
+import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 
 function Header() {
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } = useContext(ThemeContext);
 
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -17,7 +18,7 @@ function Header() {
 }
 
 function MainContent() {
-  const { isDark } = useTheme();
+  const { isDark } = useContext(ThemeContext);
 
   return (
     <main className="flex flex-col items-center justify-center flex-1 gap-6 px-6 py-16">

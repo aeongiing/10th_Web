@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 // Context의 타입 정의
 interface CounterContextType {
@@ -16,13 +16,16 @@ export const CounterContext = createContext<CounterContextType | undefined>(
 export const CounterProvider = ({ children }: { children: ReactNode }) => {
   const [count, setCount] = useState(0);
 
-  const handleIncrement = () => setCount((prev) => prev + 1);
-  const handleDecrement = () => setCount((prev) => prev - 1);
+  const handleIncrement = useCallback(() => setCount((prev) => prev + 1), []);
+  const handleDecrement = useCallback(() => setCount((prev) => prev - 1), []);
+
+  const value = useMemo(
+    () => ({ count, handleIncrement, handleDecrement }),
+    [count, handleIncrement, handleDecrement]
+  );
 
   return (
-    <CounterContext.Provider
-      value={{ count, handleIncrement, handleDecrement }}
-    >
+    <CounterContext.Provider value={value}>
       {children}
     </CounterContext.Provider>
   );

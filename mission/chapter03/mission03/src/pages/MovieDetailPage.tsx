@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import type { Movie, MovieDetail, Credits } from '../types/movie';
+import type { Movie } from '../types/movie';
+import useMovieDetail from '../hooks/useMovieDetail';
+import { TMDB_IMAGE_BASE } from '../constants/tmdb';
 
 const MovieDetailPage = () => {
   const { movieId } = useParams<{ movieId: string }>();
@@ -9,38 +9,7 @@ const MovieDetailPage = () => {
   const location = useLocation();
   const preview = (location.state as { movie?: Movie } | null)?.movie ?? null;
 
-  const [movie, setMovie] = useState<MovieDetail | null>(null);
-  const [credits, setCredits] = useState<Credits | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!movieId) return;
-
-    const fetchData = async () => {
-      setError(null);
-      try {
-        const headers = {
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
-        };
-        const [movieRes, creditsRes] = await Promise.all([
-          axios.get<MovieDetail>(
-            `https://api.themoviedb.org/3/movie/${movieId}?language=ko-KR`,
-            { headers }
-          ),
-          axios.get<Credits>(
-            `https://api.themoviedb.org/3/movie/${movieId}/credits?language=ko-KR`,
-            { headers }
-          ),
-        ]);
-        setMovie(movieRes.data);
-        setCredits(creditsRes.data);
-      } catch {
-        setError('영화 정보를 불러오는 데 실패했습니다.');
-      }
-    };
-
-    fetchData();
-  }, [movieId]);
+  const { movie, credits, error } = useMovieDetail(movieId);
 
   if (error) {
     return (
@@ -50,14 +19,12 @@ const MovieDetailPage = () => {
     );
   }
 
-  // 상세 데이터가 없으면 preview(목록에서 넘어온 데이터)로 먼저 렌더링
   const displayTitle = movie?.title ?? preview?.title;
   const displayPoster = movie?.poster_path ?? preview?.poster_path;
   const displayOverview = movie?.overview ?? preview?.overview;
   const displayVote = movie?.vote_average ?? preview?.vote_average;
   const displayDate = movie?.release_date ?? preview?.release_date;
 
-  // preview도 없으면 (직접 URL 접근) 스켈레톤
   if (!displayTitle) {
     return (
       <div className="min-h-screen bg-gray-950 text-white animate-pulse">
@@ -95,12 +62,11 @@ const MovieDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {/* 배경 이미지 — 상세 데이터 오면 교체 */}
       {movie?.backdrop_path ? (
         <div
           className="h-80 w-full bg-cover bg-center"
           style={{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
+            backgroundImage: `url(${TMDB_IMAGE_BASE}/original${movie.backdrop_path})`,
           }}
         >
           <div className="h-full w-full bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent" />
@@ -119,8 +85,8 @@ const MovieDetailPage = () => {
 
         <div className="flex gap-8">
           <img
-            src={`https://image.tmdb.org/t/p/w342${displayPoster}`}
-            alt={displayTitle}
+            src={`${TMDB_IMAGE_BASE}/w342${displayPoster}`}
+            alt={`${displayTitle || '영화'} 영화 포스터`}
             className="-mt-32 h-72 w-48 shrink-0 rounded-xl object-cover shadow-2xl"
           />
 
@@ -130,7 +96,6 @@ const MovieDetailPage = () => {
               <p className="mt-1 text-gray-400 italic">"{movie.tagline}"</p>
             )}
 
-            {/* 장르 — 상세 데이터 오면 표시, 그 전엔 skeleton */}
             <div className="mt-3 flex flex-wrap gap-2">
               {movie ? (
                 movie.genres.map((genre) => (
@@ -168,7 +133,6 @@ const MovieDetailPage = () => {
           </div>
         </div>
 
-        {/* 줄거리 */}
         <div className="mt-8">
           <h2 className="mb-2 text-xl font-semibold">줄거리</h2>
           <p className="leading-relaxed text-gray-300">
@@ -176,7 +140,6 @@ const MovieDetailPage = () => {
           </p>
         </div>
 
-        {/* 출연진 — 상세 데이터 오면 표시, 그 전엔 skeleton */}
         <div className="mt-10">
           <h2 className="mb-4 text-xl font-semibold">출연진</h2>
           {topCast.length > 0 ? (
@@ -185,8 +148,8 @@ const MovieDetailPage = () => {
                 <div key={actor.id} className="flex flex-col items-center text-center">
                   {actor.profile_path ? (
                     <img
-                      src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
-                      alt={actor.name}
+                      src={`${TMDB_IMAGE_BASE}/w185${actor.profile_path}`}
+                      alt={`${actor.name} 프로필`}
                       className="h-28 w-20 rounded-lg object-cover"
                     />
                   ) : (

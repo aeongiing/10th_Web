@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Movie, MovieResponse } from '../types/movie';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import type { Movie } from '../types/movie';
+import { fetchMoviesByCategory } from '../apis/movieApi';
+import MovieCard from '../components/MovieCard';
 
 type Props = {
   category: 'popular' | 'upcoming' | 'top_rated' | 'now_playing';
@@ -11,28 +12,17 @@ const MoviesPage = ({ category }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const prevCategoryRef = useRef(category);
 
   useEffect(() => {
-    let fetchPage = page;
-    if (prevCategoryRef.current !== category) {
-      prevCategoryRef.current = category;
-      fetchPage = 1;
-      setPage(1);
-    }
+    setPage(1);
+  }, [category]);
 
-    const fetchMovies = async () => {
+  useEffect(() => {
+    const loadMovies = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get<MovieResponse>(
-          `https://api.themoviedb.org/3/movie/${category}?language=ko-KR&page=${fetchPage}`,
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
-            },
-          }
-        );
+        const data = await fetchMoviesByCategory(category, page);
         setMovies(data.results);
       } catch {
         setError('영화 데이터를 불러오는 데 실패했습니다.');
@@ -41,7 +31,7 @@ const MoviesPage = ({ category }: Props) => {
       }
     };
 
-    fetchMovies();
+    loadMovies();
   }, [category, page]);
 
   if (isLoading) {
@@ -64,24 +54,7 @@ const MoviesPage = ({ category }: Props) => {
     <div className="p-6">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {movies?.map((movie) => (
-          <div
-            key={movie.id}
-            className="group relative overflow-hidden rounded-xl"
-          >
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-              className="w-full object-cover transition-all duration-300 group-hover:blur-sm group-hover:brightness-50"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <h2 className="text-center text-sm font-bold text-white">
-                {movie.title}
-              </h2>
-              <p className="mt-2 line-clamp-4 text-center text-xs text-gray-200">
-                {movie.overview}
-              </p>
-            </div>
-          </div>
+          <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
 

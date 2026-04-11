@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { MovieResponse } from '../types/movie';
 import { fetchMoviesByCategory } from '../apis/movieApi';
@@ -13,10 +13,12 @@ const MoviesPage = ({ category }: Props) => {
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
-  const { data, isLoading, error } = useCustomFetch<MovieResponse>(
+  const fetchFn = useCallback(
     () => fetchMoviesByCategory(category, page),
     [category, page]
   );
+
+  const { data, isLoading, error } = useCustomFetch<MovieResponse>(fetchFn);
 
   const movies = data?.results ?? [];
 
@@ -53,7 +55,9 @@ const MoviesPage = ({ category }: Props) => {
           {movies.map((movie) => (
             <div
               key={movie.id}
-              onClick={() => navigate(`/movies/${movie.id}`, { state: { movie } })}
+              onClick={() =>
+                navigate(`/movies/${movie.id}`, { state: { movie } })
+              }
               className="group relative cursor-pointer overflow-hidden rounded-xl"
             >
               <img

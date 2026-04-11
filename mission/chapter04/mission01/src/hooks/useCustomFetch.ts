@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function useCustomFetch<T>(
-  fetchFn: () => Promise<T>,
-  deps: React.DependencyList
-) {
+function useCustomFetch<T>(fetchFn: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +26,7 @@ function useCustomFetch<T>(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [fetchFn]);
 
   return { data, isLoading, error };
 }

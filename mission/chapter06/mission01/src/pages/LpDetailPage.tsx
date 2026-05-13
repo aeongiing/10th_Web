@@ -1,51 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getLp, deleteLp, likeLp, unlikeLp } from '../apis/lpApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useLpDetail } from '../hooks/useLpDetail';
 import Spinner from '../components/Spinner';
 import { formatRelativeTime } from '../utils/time';
 
 const LpDetailPage = () => {
   const { lpId } = useParams<{ lpId: string }>();
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
-  const queryClient = useQueryClient();
-
-  const { data: lp, isPending, isError } = useQuery({
-    queryKey: ['lp', lpId],
-    queryFn: () => getLp(Number(lpId)),
-    staleTime: 1000 * 30,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteLp(Number(lpId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lps'] });
-      navigate('/');
-    },
-  });
-
-  const likeMutation = useMutation({
-    mutationFn: () => {
-      const liked = lp!.likes.some((l) => l.userId === user?.id);
-      return liked ? unlikeLp(lp!.id) : likeLp(lp!.id);
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lp', lpId] }),
-  });
-
-  const handleLike = () => {
-    if (!isLoggedIn) {
-      alert('로그인이 필요한 서비스입니다. 로그인을 해주세요!');
-      navigate('/login');
-      return;
-    }
-    likeMutation.mutate();
-  };
-
-  const handleDelete = () => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-    deleteMutation.mutate();
-  };
+  const { lp, isPending, isError, user, handleLike, handleDelete, likeMutation } = useLpDetail(lpId);
 
   if (isPending) return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center">

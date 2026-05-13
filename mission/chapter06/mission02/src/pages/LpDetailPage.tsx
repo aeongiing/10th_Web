@@ -35,6 +35,7 @@ const LpDetailPage = () => {
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? (lastPage.nextCursor ?? undefined) : undefined,
+    staleTime: 1000 * 30,
   });
 
   useEffect(() => {
@@ -59,18 +60,33 @@ const LpDetailPage = () => {
   });
 
   const likeMutation = useMutation({
-    mutationFn: () => {
-      const liked = lp!.likes.some((l) => l.userId === user?.id);
-      return liked ? unlikeLp(lp!.id) : likeLp(lp!.id);
+    mutationFn: ({ id, isLiked }: { id: number; isLiked: boolean }) =>
+      isLiked ? unlikeLp(id) : likeLp(id),
+    onMutate: async ({ id, isLiked }) => {
+      await queryClient.cancelQueries({ queryKey: ['lp', lpId] });
+      const previous = queryClient.getQueryData<typeof lp>(['lp', lpId]);
+      queryClient.setQueryData<typeof lp>(['lp', lpId], (old) => {
+        if (!old || !user) return old;
+        return {
+          ...old,
+          likes: isLiked
+            ? old.likes.filter((l) => l.userId !== user.id)
+            : [...old.likes, { id: Date.now(), userId: user.id, lpId: id }],
+        };
+      });
+      return { previous };
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lp', lpId] }),
+    onError: (_err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(['lp', lpId], context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['lp', lpId] }),
   });
 
   const commentMutation = useMutation({
     mutationFn: (content: string) => createComment(Number(lpId), content),
     onSuccess: () => {
       setCommentText('');
-      queryClient.invalidateQueries({ queryKey: ['lpComments', lpId] });
+      queryClient.invalidateQueries({ queryKey: ['lpComments', lpId, commentOrder] });
     },
   });
 
@@ -85,7 +101,8 @@ const LpDetailPage = () => {
       navigate('/login');
       return;
     }
-    likeMutation.mutate();
+    if (!lp) return;
+    likeMutation.mutate({ id: lp.id, isLiked: lp.likes.some((l) => l.userId === user?.id) });
   };
 
   const handleDelete = () => {

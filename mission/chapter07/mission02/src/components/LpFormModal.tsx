@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface LpFormData {
   title: string;
@@ -20,13 +20,21 @@ const LpFormContent = ({ onClose, modalTitle, initialData, onSubmit, isPending }
   const [title, setTitle] = useState(initialData?.title ?? '');
   const [content, setContent] = useState(initialData?.content ?? '');
   const [thumbnail, setThumbnail] = useState<string | undefined>(initialData?.thumbnail);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(initialData?.thumbnail);
   const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    const preview = thumbnailPreview;
+    if (!preview?.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [thumbnailPreview]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setThumbnailPreview(URL.createObjectURL(file));
     const reader = new FileReader();
     reader.onload = () => setThumbnail(reader.result as string);
     reader.readAsDataURL(file);
@@ -96,8 +104,8 @@ const LpFormContent = ({ onClose, modalTitle, initialData, onSubmit, isPending }
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-32 rounded-xl border border-dashed border-zinc-700 bg-zinc-800 flex items-center justify-center cursor-pointer hover:border-rose-500/50 transition overflow-hidden"
             >
-              {thumbnail ? (
-                <img src={thumbnail} alt="thumbnail preview" className="w-full h-full object-cover" />
+              {thumbnailPreview ? (
+                <img src={thumbnailPreview} alt="thumbnail preview" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-1.5 text-zinc-600">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

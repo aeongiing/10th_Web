@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/authContextCore';
 import { updateMe } from '../apis/authApi';
@@ -17,7 +17,14 @@ const MyPage = () => {
   const queryClient = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState<EditForm>({ name: '', bio: '', avatar: undefined });
+  const [avatarPreview, setAvatarPreview] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const preview = avatarPreview;
+    if (!preview?.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [avatarPreview]);
 
   const { data, isPending } = useQuery({
     queryKey: ['myLps', user?.id],
@@ -28,7 +35,6 @@ const MyPage = () => {
   const updateMutation = useMutation({
     mutationFn: updateMe,
     onMutate: async (variables) => {
-      await queryClient.cancelQueries({ queryKey: ['myLps', user?.id] });
       const previousUser = user;
       updateUser({
         ...user!,
@@ -54,12 +60,14 @@ const MyPage = () => {
 
   const openEdit = () => {
     setForm({ name: user?.name ?? '', bio: user?.bio ?? '', avatar: user?.avatar });
+    setAvatarPreview(user?.avatar);
     setEditOpen(true);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setAvatarPreview(URL.createObjectURL(file));
     const reader = new FileReader();
     reader.onload = () => setForm((prev) => ({ ...prev, avatar: reader.result as string }));
     reader.readAsDataURL(file);
@@ -154,8 +162,8 @@ const MyPage = () => {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-20 h-20 rounded-full bg-rose-600 flex items-center justify-center text-white text-2xl font-bold cursor-pointer overflow-hidden hover:opacity-80 transition-opacity"
                 >
-                  {form.avatar ? (
-                    <img src={form.avatar} alt="avatar" className="w-full h-full object-cover" />
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
                     form.name?.[0]?.toUpperCase() ?? '?'
                   )}

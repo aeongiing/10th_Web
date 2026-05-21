@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 .env
 
 UMC-8th-BE/
+
+.playwright-mcp

@@ -37,7 +37,6 @@ const LpListPage = () => {
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? (lastPage.nextCursor ?? undefined) : undefined,
-    enabled: !query || !!trimmedQuery,
     staleTime: 1000 * 60,
   });
 
@@ -67,7 +66,6 @@ const LpListPage = () => {
   });
 
   const lps = data?.pages.flatMap((p) => p.data) ?? [];
-  const isBlocked = query !== '' && trimmedQuery.length === 0;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -115,24 +113,16 @@ const LpListPage = () => {
         </div>
       )}
 
-      {isBlocked && (
-        <p className="text-center text-zinc-600 text-sm py-12">검색어를 입력해주세요.</p>
-      )}
-
-      {!isBlocked && (
-        <>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-0.5">
-            {isPending
-              ? Array.from({ length: 12 }).map((_, i) => <LpCardSkeleton key={i} />)
-              : lps.map((lp) => <LpCard key={lp.id} lp={lp} />)
-            }
-            {isFetchingNextPage &&
-              Array.from({ length: 6 }).map((_, i) => <LpCardSkeleton key={`next-${i}`} />)
-            }
-          </div>
-          <div ref={sentinelRef} className="h-4" />
-        </>
-      )}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-0.5">
+        {isPending
+          ? Array.from({ length: 12 }).map((_, i) => <LpCardSkeleton key={i} />)
+          : lps.map((lp) => <LpCard key={lp.id} lp={lp} />)
+        }
+        {isFetchingNextPage &&
+          Array.from({ length: 6 }).map((_, i) => <LpCardSkeleton key={`next-${i}`} />)
+        }
+      </div>
+      <div ref={sentinelRef} className="h-4" />
 
       {isLoggedIn && (
         <button

@@ -26,13 +26,22 @@ const initialState: CartState = {
   total: initTotals.total,
 };
 
+const updateTotals = (state: CartState) => {
+  const { amount, total } = calcTotals(state.cartItems);
+  state.amount = amount;
+  state.total = total;
+};
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
     increase(state, action: PayloadAction<string>) {
       const item = state.cartItems.find((i) => i.id === action.payload);
-      if (item) item.amount += 1;
+      if (item) {
+        item.amount += 1;
+        updateTotals(state);
+      }
     },
     decrease(state, action: PayloadAction<string>) {
       const item = state.cartItems.find((i) => i.id === action.payload);
@@ -42,24 +51,20 @@ const cartSlice = createSlice({
       } else {
         item.amount -= 1;
       }
+      updateTotals(state);
     },
     removeItem(state, action: PayloadAction<string>) {
       state.cartItems = state.cartItems.filter((i) => i.id !== action.payload);
+      updateTotals(state);
     },
     clearCart(state) {
       state.cartItems = [];
       state.amount = 0;
       state.total = 0;
     },
-    calculateTotals(state) {
-      const { amount, total } = calcTotals(state.cartItems);
-      state.amount = amount;
-      state.total = total;
-    },
   },
 });
 
-export const { increase, decrease, removeItem, clearCart, calculateTotals } =
-  cartSlice.actions;
+export const { increase, decrease, removeItem, clearCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

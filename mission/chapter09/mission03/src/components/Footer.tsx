@@ -1,8 +1,7 @@
-import useCartStore from '../store/useCartStore';
+import useCartStore, { useCartTotals } from '../store/useCartStore';
 
 const Footer = () => {
-  const amount = useCartStore((state) => state.amount);
-  const total = useCartStore((state) => state.total);
+  const { amount, total } = useCartTotals();
   const openModal = useCartStore((state) => state.openModal);
 
   return (

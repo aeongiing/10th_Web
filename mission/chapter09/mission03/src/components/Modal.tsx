@@ -26,7 +26,7 @@ const Modal = () => {
         <div className="flex gap-4 w-full">
           <button
             type="button"
-            onClick={clearCart}
+            onClick={() => { clearCart(); closeModal(); }}
             className="flex-1 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors"
           >
             네

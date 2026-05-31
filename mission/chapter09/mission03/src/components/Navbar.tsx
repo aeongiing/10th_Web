@@ -1,7 +1,7 @@
-import useCartStore from '../store/useCartStore';
+import { useCartTotals } from '../store/useCartStore';
 
 const Navbar = () => {
-  const amount = useCartStore((state) => state.amount);
+  const { amount } = useCartTotals();
 
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between shadow-md">
